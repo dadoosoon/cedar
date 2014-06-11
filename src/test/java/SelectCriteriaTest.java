@@ -1,7 +1,7 @@
 
-import im.dadoo.cedar.Criteria;
 import im.dadoo.cedar.SelectCriteria;
 import im.dadoo.cedar.condition.Conditions;
+import im.dadoo.cedar.order.Orders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -22,7 +22,10 @@ public class SelectCriteriaTest {
   @Test
   public void print() {
     SelectCriteria c = new SelectCriteria();
-    c.select().from("t_tag").add(Conditions.eq("id"));
+    c.select("id","name").from("t_tag").add(Conditions.eq("id"))
+            .add(Conditions.between("name", "a", "b"))
+            .addOrder(Orders.desc("id"))
+            .limit("pagecount", "pagesize");
     System.out.println(c.sql());
   }
 }

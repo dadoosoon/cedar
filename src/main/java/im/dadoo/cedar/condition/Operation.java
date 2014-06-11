@@ -14,7 +14,7 @@ public enum Operation {
   
   EQ("="),GT(">"),LT("<"),BETWEEN("BETWEEN"),LIKE("LIKE");
   
-  private String word;
+  private final String word;
   
   private Operation(String word) {
     this.word = word;

@@ -7,27 +7,47 @@
 package im.dadoo.cedar;
 
 import im.dadoo.cedar.condition.Condition;
+import im.dadoo.cedar.order.Order;
+import im.dadoo.cedar.util.Util;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
  * @author shuwen.zsw
  */
-public class SelectCriteria extends Criteria {
+public class SelectCriteria extends TableCriteria {
 
-  private List<String> fields;
-  private List<Condition> conditions;
-  //private List<Order> orders;
+  private final List<String> fields;
+  private final List<Condition> conditions;
+  private List<Order> orders;
+  private Pair<String, String> limits;
+  
   
   public SelectCriteria() {
+    super();
     this.fields = new ArrayList<>();
     this.conditions = new ArrayList<>(3);
+    this.orders = new ArrayList<>(3);
+    this.limits = null;
   }
   
   public SelectCriteria select() {
     this.fields.add("*");
+    return this;
+  }
+  
+  public SelectCriteria select(String ... fields) {
+    Collections.addAll(this.fields, fields);
+    return this;
+  }
+  
+  public SelectCriteria select(List<String> fields) {
+    this.fields.addAll(fields);
     return this;
   }
   
@@ -43,27 +63,92 @@ public class SelectCriteria extends Criteria {
     return this;
   }
   
+  public SelectCriteria addOrder(Order order) {
+    if (order != null) {
+      this.orders.add(order);
+    }
+    return this;
+  }
+  
+  public SelectCriteria limit(String limit) {
+    this.limits = ImmutablePair.of(Util.placeholder(limit), null);
+    return this;
+  }
+  
+  public SelectCriteria limit(String pagecount, String pagesize) {
+    this.limits = ImmutablePair.of(Util.placeholder(pagecount), Util.placeholder(pagesize));
+    return this;
+  }
+  
   @Override
   public String sql() {
     StringBuilder sb = new StringBuilder();
-    sb.append("SELECT ").append(this.fields.get(0)).append(" ");
-    sb.append("FROM ").append(table).append(" ");
-    if (this.conditions != null && !this.conditions.isEmpty()) { 
-      sb.append("WHERE ").append(this.parseCondition(this.conditions.get(0))).append(" ");
-      if (this.conditions.size() > 1) {
-        for (int i = 1; i < this.conditions.size(); i++) {
-          sb.append("AND ").append(this.parseCondition(this.conditions.get(i))).append(" ");
+    sb.append("SELECT ");
+    //字段名缺失无法构造sql
+    if (this.fields == null || this.fields.isEmpty()) {
+      return null;
+    } else {
+      int i = 0;
+      for (; i < this.fields.size() - 1; i++) {
+        sb.append(this.fields.get(i)).append(", ");
+      }
+      sb.append(this.fields.get(i)).append(" ");
+      
+      //表名缺失无法构造sql
+      if (StringUtils.isBlank(this.table)) {
+        return null;
+      } else {
+        sb.append("FROM ").append(this.table).append(" ");
+        
+        //增加筛选条件
+        if (this.conditions != null && !this.conditions.isEmpty()) { 
+          sb.append("WHERE ").append(this.makeConditionSql(this.conditions.get(0))).append(" ");
+          if (this.conditions.size() > 1) {
+            for (i = 1; i < this.conditions.size(); i++) {
+              sb.append("AND ").append(this.makeConditionSql(this.conditions.get(i))).append(" ");
+            }
+          }
+        }
+        
+        //增加排序条件
+        if (this.orders != null && !this.orders.isEmpty()) {
+          sb.append("ORDER BY ").append(this.makeOrderSql(this.orders.get(0))).append(" ");
+          if (this.orders.size() > 1) {
+            for (i = 1; i < this.orders.size(); i++) {
+              sb.append(", ").append(this.makeOrderSql(this.orders.get(i))).append(" ");
+            }
+          }
+        }
+        //增加limit条件
+        if (this.limits != null) {
+          if (this.limits.getRight() == null) {
+            sb.append("LIMIT ").append(this.limits.getLeft());
+          } else {
+            sb.append("LIMIT ").append(this.limits.getLeft())
+                    .append(", ").append(this.limits.getRight());
+          }
         }
       }
     }
     return sb.toString();
   }
   
-  private String parseCondition(Condition condition) {
-    if (condition != null) {
-      StringBuilder sb = new StringBuilder();
+  private String makeOrderSql(Order order) {
+    StringBuilder sb = new StringBuilder();
+    if (order != null && order.getField() != null && order.getMode() != null) {
+      sb.append(order.getField()).append(" ").append(order.getMode().getWord());
+    }
+    return sb.toString();
+  }
+  
+  private String makeConditionSql(Condition condition) {
+    StringBuilder sb = new StringBuilder();
+    if (condition != null && condition.getField() != null 
+            && condition.getOp() != null && condition.getValue() != null) {
       switch(condition.getOp()) {
         case EQ:
+        case GT:
+        case LT:
           sb.append(condition.getField()).append(" ")
                   .append(condition.getOp().getWord()).append(" ")
                   .append(condition.getValue());
@@ -75,10 +160,9 @@ public class SelectCriteria extends Criteria {
                   .append(pair.getLeft()).append(" ")
                   .append("AND").append(" ")
                   .append(pair.getRight());
+          break;
       }
-      return sb.toString();
-    } else {
-      return null;
     }
+    return sb.toString();
   }
 }

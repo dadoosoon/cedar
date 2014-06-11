@@ -4,16 +4,24 @@
  * and open the template in the editor.
  */
 
-package im.dadoo.cedar;
+package im.dadoo.cedar.order;
 
 /**
  *
  * @author shuwen.zsw
  */
-public abstract class Criteria {
+public enum OrderMode {
   
-  public Criteria() {}
+  ASC("ASC"), DESC("DESC");
   
-  public abstract String sql();
+  private final String word;
   
+  private OrderMode(String word) {
+    this.word = word;
+  }
+
+  public String getWord() {
+    return this.word;
+  }
+
 }

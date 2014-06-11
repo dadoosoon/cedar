@@ -6,6 +6,7 @@
 
 package im.dadoo.cedar.condition;
 
+import im.dadoo.cedar.util.Util;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
@@ -21,7 +22,7 @@ public final class Conditions {
   }
   
   public static Condition eq(String field) {
-    return Conditions.eq(field, ":" + field);
+    return Conditions.eq(field, Util.placeholder(field));
   }
   
   public static Condition gt(String field, String value) {
@@ -29,10 +30,12 @@ public final class Conditions {
   }
   
   public static Condition gt(String field) {
-    return Conditions.gt(field, ":" + field);
+    return Conditions.gt(field, Util.placeholder(field));
   }
   
   public static Condition between(String field, String begin, String end) {
-    return new Condition(field, Operation.BETWEEN, ImmutablePair.of(begin, end));
+    return new Condition(field, Operation.BETWEEN, 
+            ImmutablePair.of(Util.placeholder(begin), Util.placeholder(end)));
   }
+
 }

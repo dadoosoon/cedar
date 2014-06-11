@@ -4,16 +4,18 @@
  * and open the template in the editor.
  */
 
-package im.dadoo.cedar;
+package im.dadoo.cedar.util;
 
 /**
  *
  * @author shuwen.zsw
  */
-public abstract class Criteria {
+public final class Util {
   
-  public Criteria() {}
+  private Util(){}
   
-  public abstract String sql();
-  
+  //转换成spring-jdbc中需要的参数占位符
+  public static String placeholder(String value) {
+    return ":" + value;
+  }
 }
