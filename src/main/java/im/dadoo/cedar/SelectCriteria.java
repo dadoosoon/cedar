@@ -153,6 +153,18 @@ public class SelectCriteria extends TableCriteria {
                   .append(condition.getOp().getWord()).append(" ")
                   .append(condition.getValue());
           break;
+        case IN:
+          String temp = null;
+          //判断是否为子查询
+          if (condition.getValue() instanceof String) {
+            temp = (String)condition.getValue();
+          } else if (condition.getValue() instanceof SelectCriteria) {
+            temp = ((SelectCriteria)condition.getValue()).sql();
+          }
+          sb.append(condition.getField()).append(" ")
+                    .append(condition.getOp().getWord()).append(" ")
+                    .append("( ").append(temp).append(" )");
+          break;
         case BETWEEN:
           Pair<String, String> pair = (Pair<String, String>)condition.getValue();
           sb.append(condition.getField()).append(" ")

@@ -21,9 +21,12 @@ public class SelectCriteriaTest {
   
   @Test
   public void print() {
+    SelectCriteria sub = new SelectCriteria();
+    sub.select("id").from("t_user").limit("limit");
     SelectCriteria c = new SelectCriteria();
-    c.select("id","name").from("t_tag").add(Conditions.eq("id"))
+    c.select("id","name").from("t_tag")
             .add(Conditions.between("name", "a", "b"))
+            .add(Conditions.in("id", sub))
             .addOrder(Orders.desc("id"))
             .limit("pagecount", "pagesize");
     System.out.println(c.sql());

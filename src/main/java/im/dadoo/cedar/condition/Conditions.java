@@ -6,6 +6,7 @@
 
 package im.dadoo.cedar.condition;
 
+import im.dadoo.cedar.SelectCriteria;
 import im.dadoo.cedar.util.Util;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -37,5 +38,16 @@ public final class Conditions {
     return new Condition(field, Operation.BETWEEN, 
             ImmutablePair.of(Util.placeholder(begin), Util.placeholder(end)));
   }
+  
+  public static Condition in(String field, String value) {
+    return new Condition(field, Operation.IN, Util.placeholder(value));
+  }
 
+  public static Condition in(String field) {
+    return Conditions.in(field, field);
+  }
+  
+  public static Condition in(String field, SelectCriteria criteria) {
+    return new Condition(field, Operation.IN, criteria);
+  }
 }

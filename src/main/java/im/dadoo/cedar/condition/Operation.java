@@ -12,7 +12,7 @@ package im.dadoo.cedar.condition;
  */
 public enum Operation {
   
-  EQ("="),GT(">"),LT("<"),BETWEEN("BETWEEN"),LIKE("LIKE");
+  EQ("="),GT(">"),LT("<"),BETWEEN("BETWEEN"),LIKE("LIKE"),IN("IN");
   
   private final String word;
   
