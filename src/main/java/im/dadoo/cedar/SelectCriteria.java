@@ -24,7 +24,7 @@ public class SelectCriteria extends TableCriteria {
 
   private final List<String> fields;
   private final List<Condition> conditions;
-  private List<Order> orders;
+  private final List<Order> orders;
   private Pair<String, String> limits;
   
   
